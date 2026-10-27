@@ -4,6 +4,6 @@ import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
 
 public interface CreatePostUseCase {
 
-    Long create(CreatePostCommand command);
+    Long create (CreatePostCommand createPostCommand);
 
 }

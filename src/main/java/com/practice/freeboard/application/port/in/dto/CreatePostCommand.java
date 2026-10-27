@@ -7,8 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CreatePostCommand {
 
-    // 내용: title, content, authorName 필드 + 생성자/getter
-
     private String title;
     private String content;
     private String authorName;
