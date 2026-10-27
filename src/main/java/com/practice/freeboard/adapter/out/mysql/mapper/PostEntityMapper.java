@@ -13,7 +13,7 @@ public class PostEntityMapper {
     public PostEntity toEntity (Post post) {
 
         return new PostEntity (
-                null,
+                post.getId(),
                 post.getTitle(),
                 post.getContent(),
                 post.getAuthorName(),

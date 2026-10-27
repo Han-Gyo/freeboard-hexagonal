@@ -2,9 +2,12 @@ package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
 import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
+import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.CreatePostUseCase;
 import com.practice.freeboard.application.port.in.GetPostUseCase;
+import com.practice.freeboard.application.port.in.UpdatePostUseCase;
 import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
+import com.practice.freeboard.application.port.in.dto.UpdatePostCommand;
 import com.practice.freeboard.domain.model.Post;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +24,14 @@ public class PostController {
 
     private final GetPostUseCase getPostUseCase;
 
+    private final UpdatePostUseCase updatePostUseCase;
+
     public PostController(CreatePostUseCase createPostUseCase,
-                          GetPostUseCase getPostUseCase) {
+                          GetPostUseCase getPostUseCase,
+                          UpdatePostUseCase updatePostUseCase) {
         this.createPostUseCase = createPostUseCase;
         this.getPostUseCase = getPostUseCase;
+        this.updatePostUseCase = updatePostUseCase;
     }
 
     @PostMapping
@@ -65,6 +72,24 @@ public class PostController {
 
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> update(
+            @PathVariable Long id,
+            @RequestBody UpdatePostRequestVo request
+            ) {
+
+        UpdatePostCommand updatePostCommand = new UpdatePostCommand(
+                id,
+                request.getTitle(),
+                request.getContent(),
+                request.getAuthorName()
+        );
+
+        updatePostUseCase.update(updatePostCommand);
+
+        return ResponseEntity.ok(Map.of("message", "수정 완료"));
+
+    }
 
 
 }
