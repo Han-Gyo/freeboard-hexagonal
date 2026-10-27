@@ -4,6 +4,7 @@ import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
 import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
 import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.CreatePostUseCase;
+import com.practice.freeboard.application.port.in.DeletePostUseCase;
 import com.practice.freeboard.application.port.in.GetPostUseCase;
 import com.practice.freeboard.application.port.in.UpdatePostUseCase;
 import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
@@ -26,12 +27,18 @@ public class PostController {
 
     private final UpdatePostUseCase updatePostUseCase;
 
+    private final DeletePostUseCase deletePostUseCase;
+
     public PostController(CreatePostUseCase createPostUseCase,
                           GetPostUseCase getPostUseCase,
-                          UpdatePostUseCase updatePostUseCase) {
+                          UpdatePostUseCase updatePostUseCase,
+                          DeletePostUseCase deletePostUseCase) {
+
         this.createPostUseCase = createPostUseCase;
         this.getPostUseCase = getPostUseCase;
         this.updatePostUseCase = updatePostUseCase;
+        this.deletePostUseCase = deletePostUseCase;
+
     }
 
     @PostMapping
@@ -91,5 +98,13 @@ public class PostController {
 
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id){
+
+        deletePostUseCase.delete(id);
+
+        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+
+    }
 
 }
