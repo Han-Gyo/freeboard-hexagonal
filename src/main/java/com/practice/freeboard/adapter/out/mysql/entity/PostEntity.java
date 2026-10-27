@@ -35,6 +35,7 @@ public class PostEntity {
 
     public PostEntity(Long id, String title, String content, String authorName,
                       PostType postType, LocalDateTime createdAt) {
+        this.id = id;
         this.title = title;
         this.content = content;
         this.authorName = authorName;
