@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: freeboard
+  datasource:
+    url: jdbc:mysql://localhost:3306/freeboard
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
