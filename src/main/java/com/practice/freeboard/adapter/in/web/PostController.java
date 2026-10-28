@@ -1,15 +1,15 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
+import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
 import com.practice.freeboard.application.port.in.CreatePostUseCase;
+import com.practice.freeboard.application.port.in.ReadPostUseCase;
 import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
+import com.practice.freeboard.domain.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -21,7 +21,9 @@ public class PostController {
     // http에서 usecase만 호출
     private final CreatePostUseCase createPostUseCase;
 
-    // 저장된 후 id 값을 프론트에 키, 벨류("메시지", id값) json형식으로 보낼거임
+    private final ReadPostUseCase readPostUseCase;
+
+    // 저장된 후 id를 프론트에 키, 벨류("id", id의 값) json형식으로 보낼거임
     @PostMapping
     public ResponseEntity<Map<String, Long>>create(@RequestBody CreatePostRequestVo request){
 
@@ -39,6 +41,28 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id)) ;
 
     }
+
+
+    // Read_One 클라이언트가 요청한 id값의 데이터들 조회해서 Domain에 담았고 Vo로 변환해서 프론트에 넘김
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseVo> getPost(@PathVariable Long id){
+
+        // UseCase에 Long타입의 id값을 넘겨주고 로직 수행한 후 결과 값을 도메인 타입인 post변수에 담음
+        Post post = readPostUseCase.getById(id);
+
+        // 도메인 타입의 값을 vo에 담음 객체생성 하면서 생성자 초기화 하기.
+        PostResponseVo postResponseVo = new PostResponseVo(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getAuthorName()
+        );
+
+        // 상태코드가 200 즉 정상이면 클라이언트한테 값을 담은 vo 객체를 보낸다.
+        return ResponseEntity.ok(postResponseVo);
+
+    }
+
 
 
 }
