@@ -4,6 +4,7 @@ import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
 import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
 import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.CreatePostUseCase;
+import com.practice.freeboard.application.port.in.DeletePostUseCase;
 import com.practice.freeboard.application.port.in.ReadPostUseCase;
 import com.practice.freeboard.application.port.in.UpdatePostUseCase;
 import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
@@ -27,6 +28,8 @@ public class PostController {
     private final ReadPostUseCase readPostUseCase;
 
     private final UpdatePostUseCase updatePostUseCase;
+
+    private final DeletePostUseCase deletePostUseCase;
 
     // 저장된 후 id를 프론트에 키, 벨류("id", id의 값) json형식으로 보낼거임
     @PostMapping
@@ -84,6 +87,17 @@ public class PostController {
 
 
         return ResponseEntity.ok(Map.of("message", "수정 완료"));
+    }
+
+    // 요청 body로 받을 값이 없기 때문에 Vo, command 스킵하고 바로 useCase 리턴은 키 벨류로 "message" : "삭제 완료"
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>>delete(@PathVariable Long id){
+
+        // UseCase로 요청 url id 값 다이렉트로 보내기
+        deletePostUseCase.delete(id);
+
+        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+
     }
 
 
