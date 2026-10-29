@@ -2,9 +2,12 @@ package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
 import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
+import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.CreatePostUseCase;
 import com.practice.freeboard.application.port.in.ReadPostUseCase;
+import com.practice.freeboard.application.port.in.UpdatePostUseCase;
 import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
+import com.practice.freeboard.application.port.in.dto.UpdatePostCommand;
 import com.practice.freeboard.domain.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +25,8 @@ public class PostController {
     private final CreatePostUseCase createPostUseCase;
 
     private final ReadPostUseCase readPostUseCase;
+
+    private final UpdatePostUseCase updatePostUseCase;
 
     // 저장된 후 id를 프론트에 키, 벨류("id", id의 값) json형식으로 보낼거임
     @PostMapping
@@ -63,6 +68,23 @@ public class PostController {
 
     }
 
+    // update id는 PathVariable 나머지는 RequestBody에 넣어두기
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String> > postUpdate (@PathVariable Long id,
+                        @RequestBody UpdatePostRequestVo updatePostRequestVo) {
+
+        // 사용자한테 받은 데이터 Vo에 있는데 command 즉 dto에 담기
+        UpdatePostCommand updatePostCommand = new UpdatePostCommand(
+                id,
+                updatePostRequestVo.getTitle(),
+                updatePostRequestVo.getContent());
+
+        // UseCase로 보내기 (비즈니스 로직 수행 해야하니깐) 객체생성 및 생성자는 전역변수로 처리해둠
+        updatePostUseCase.update(updatePostCommand);
+
+
+        return ResponseEntity.ok(Map.of("message", "수정 완료"));
+    }
 
 
 }
