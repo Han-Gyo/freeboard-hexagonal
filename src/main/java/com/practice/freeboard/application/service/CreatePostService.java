@@ -1,43 +1,34 @@
 package com.practice.freeboard.application.service;
 
-import com.practice.freeboard.application.port.in.CreatePostUseCase;
-import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
-import com.practice.freeboard.application.port.out.PostSavePort;
+import com.practice.freeboard.application.port.in.command.CreatePostCommand;
+import com.practice.freeboard.application.port.in.usecase.CreatePostUseCase;
+import com.practice.freeboard.application.port.out.CreatePostPort;
 import com.practice.freeboard.domain.model.Post;
-import com.practice.freeboard.domain.model.PostType;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-@Service
+@Service    // 이 클래스는 비즈니스 로직을 처리하는 클래스다.
+@AllArgsConstructor
 public class CreatePostService implements CreatePostUseCase {
 
-    // 바깥(DB)으로 나가는 포트 - 실제로는 PostSaveAdapter가 붙음
-    private final PostSavePort postSavePort;
-
-    public CreatePostService(PostSavePort postSavePort) {
-        this.postSavePort = postSavePort;
-    }
-
+    private final CreatePostPort createPostPort;
 
     @Override
-    @Transactional  // 이 메서드 안에서 DB 작업 하나의 단위로 묶음
-    public Long create(CreatePostCommand command) {
-        // 1) 커맨드 -> 도메인 Post (아직 id 없음)
-        Post post = new Post(
-                null,
-                command.getTitle(),
-                command.getContent(),
-                command.getAuthorName(),
-                PostType.FREE,              // 지금은 자유게시판 고정
-                LocalDateTime.now()
-        );
+    public Long createPost(CreatePostCommand createPostCommand) {
 
-        // 2) 저장 (Adapter -> DB ) 후 id 채운 Post가 돌아옴
-        Post saved = postSavePort.save(post);
+        // dto를 도메인에 넣고 검증하기
+        Post post = new Post(null,
+                createPostCommand.getTitle(),
+                createPostCommand.getContent(),
+                createPostCommand.getAuthorName(),
+                LocalDateTime.now());
 
-        // 3) Controller가 201 응답에 쓸 id
-        return saved.getId();
+        // 도메인 db로 가는 출구인 port로 보내고 저장 완료 되면 결과값 받아오기
+        Post created = createPostPort.createPost(post);
+
+        // id 값을 컨트롤러에게 넘기기   -> 다음 단계는 도메인을 엔터티로 매핑해야 하기 때문에 엔터티 만들러가자
+        return created.getId();
     }
 }

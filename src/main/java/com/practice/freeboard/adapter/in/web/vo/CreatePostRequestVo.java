@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor  // AllArgsConstructor만 쓰게 되면 값을 못 넣는경우도 생김
 @AllArgsConstructor
-@NoArgsConstructor
 public class CreatePostRequestVo {
 
     private String title;
