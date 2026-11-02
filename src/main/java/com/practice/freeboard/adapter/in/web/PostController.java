@@ -6,6 +6,7 @@ import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.command.CreatePostCommand;
 import com.practice.freeboard.application.port.in.command.UpdatePostCommand;
 import com.practice.freeboard.application.port.in.usecase.CreatePostUseCase;
+import com.practice.freeboard.application.port.in.usecase.DeletePostUseCase;
 import com.practice.freeboard.application.port.in.usecase.ReadPostUseCase;
 import com.practice.freeboard.application.port.in.usecase.UpdatePostUseCase;
 import com.practice.freeboard.domain.model.Post;
@@ -24,6 +25,7 @@ public class PostController {
     private final CreatePostUseCase createPostUseCase;
     private final ReadPostUseCase readPostUseCase;
     private final UpdatePostUseCase updatePostUseCase;
+    private final DeletePostUseCase deletePostUseCase;
 
     @PostMapping
     public ResponseEntity<Map<String, Long>> createPost (@RequestBody CreatePostRequestVo createPostRequestVo){
@@ -67,6 +69,16 @@ public class PostController {
         updatePostUseCase.update(updateDto);
 
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "수정 완료"));
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> delete (@PathVariable Long id){
+
+        // 담을 그릇 즉 DTO 만들 필요없이 바로 useCase가면 됨
+        deletePostUseCase.delete(id);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "삭제 완료"));
 
     }
 
