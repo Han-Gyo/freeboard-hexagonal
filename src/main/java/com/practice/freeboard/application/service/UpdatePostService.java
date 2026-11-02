@@ -8,6 +8,7 @@ import com.practice.freeboard.application.port.out.UpdatePostPort;
 import com.practice.freeboard.domain.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -20,6 +21,7 @@ public class UpdatePostService implements UpdatePostUseCase {
 
 
     @Override
+    @Transactional // 모든 동작이 전부 성공돼야함 하나라도 실패시 롤백 처리 하기 위해서 트랜잭셔널 사용
     public void update(UpdatePostCommand updatePostCommand) {
 
         // 사용자가 update 요청한 게시글이 있는지 조회하기 ( readPostPort 재사용 )
