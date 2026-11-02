@@ -2,9 +2,12 @@ package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
 import com.practice.freeboard.adapter.in.web.vo.ReadPostResponseVo;
+import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.command.CreatePostCommand;
+import com.practice.freeboard.application.port.in.command.UpdatePostCommand;
 import com.practice.freeboard.application.port.in.usecase.CreatePostUseCase;
 import com.practice.freeboard.application.port.in.usecase.ReadPostUseCase;
+import com.practice.freeboard.application.port.in.usecase.UpdatePostUseCase;
 import com.practice.freeboard.domain.model.Post;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +23,7 @@ public class PostController {
 
     private final CreatePostUseCase createPostUseCase;
     private final ReadPostUseCase readPostUseCase;
+    private final UpdatePostUseCase updatePostUseCase;
 
     @PostMapping
     public ResponseEntity<Map<String, Long>> createPost (@RequestBody CreatePostRequestVo createPostRequestVo){
@@ -49,6 +53,21 @@ public class PostController {
                 post.getAuthorName());
 
         return ResponseEntity.ok(readPostResponseVo);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id,
+                                                      @RequestBody UpdatePostRequestVo updatePostRequestVo){
+
+        // 1. Vo -> DTO
+        UpdatePostCommand updateDto = new UpdatePostCommand(id, updatePostRequestVo.getTitle(),
+                updatePostRequestVo.getContent());
+
+        // 2. UseCase 가기
+        updatePostUseCase.update(updateDto);
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "수정 완료"));
+
     }
 
 }
