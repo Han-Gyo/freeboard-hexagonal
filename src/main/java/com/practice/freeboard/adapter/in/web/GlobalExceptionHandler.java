@@ -1,6 +1,7 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.application.exception.PostNotFoundException;
+import com.practice.freeboard.domain.exception.InvalidPostException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,6 +27,15 @@ public class GlobalExceptionHandler {
 
         // 400고정은 HttpStatus.BAD_REQUEST임
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "입력값이 올바르지 않습니다."));
+    }
+
+    // Domain 규칙 위반 ( 금지어 등등 ) -> 400
+    @ExceptionHandler(InvalidPostException.class)
+    public ResponseEntity<Map<String, String>> handlerInvalidPost(InvalidPostException e){
+
+        // 규칙 위반은 잘못된 요청이라 HttpStatus.BAD_REQUEST임
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+
     }
 
 }

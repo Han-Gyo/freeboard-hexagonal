@@ -35,6 +35,9 @@ public class UpdatePostService implements UpdatePostUseCase {
                 exist.getAuthorName(),
                 exist.getCreatedAt());
 
+        // 도메인 규칙 검사
+        updatePost.validate();
+
         // domain에 담은 내용들 업데이트하는 출구로 보내기
         updatePostPort.update(updatePost);
 
