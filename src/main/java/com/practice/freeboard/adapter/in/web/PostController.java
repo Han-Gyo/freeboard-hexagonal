@@ -10,6 +10,7 @@ import com.practice.freeboard.application.port.in.usecase.DeletePostUseCase;
 import com.practice.freeboard.application.port.in.usecase.ReadPostUseCase;
 import com.practice.freeboard.application.port.in.usecase.UpdatePostUseCase;
 import com.practice.freeboard.domain.model.Post;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class PostController {
     private final DeletePostUseCase deletePostUseCase;
 
     @PostMapping
-    public ResponseEntity<Map<String, Long>> createPost (@RequestBody CreatePostRequestVo createPostRequestVo){
+    public ResponseEntity<Map<String, Long>> createPost (@RequestBody @Valid CreatePostRequestVo createPostRequestVo){
 
         // vo -> dto
         CreatePostCommand createPostCommand = new CreatePostCommand(
@@ -59,7 +60,7 @@ public class PostController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable Long id,
-                                                      @RequestBody UpdatePostRequestVo updatePostRequestVo){
+                                                      @RequestBody @Valid UpdatePostRequestVo updatePostRequestVo){
 
         // 1. Vo -> DTO
         UpdatePostCommand updateDto = new UpdatePostCommand(id, updatePostRequestVo.getTitle(),

@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Local / macOS ###
+.DS_Store
+**/.DS_Store
+공통_형식_모음/

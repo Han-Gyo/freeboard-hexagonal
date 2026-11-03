@@ -3,6 +3,7 @@ package com.practice.freeboard.adapter.in.web;
 import com.practice.freeboard.application.exception.PostNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -17,6 +18,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handlerPostNotFound(PostNotFoundException e){
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    }
+
+    // @Valid 형식 검증 실패 → 400 JSON 통일시키기 통일 안 시키면 JSON 모양이 제각각임
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handlerValidation(MethodArgumentNotValidException e){
+
+        // 400고정은 HttpStatus.BAD_REQUEST임
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "입력값이 올바르지 않습니다."));
     }
 
 }
