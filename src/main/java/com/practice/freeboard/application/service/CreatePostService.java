@@ -25,6 +25,9 @@ public class CreatePostService implements CreatePostUseCase {
                 createPostCommand.getAuthorName(),
                 LocalDateTime.now());
 
+        // Domain 규칙 검사 (금지어 등등)
+        post.validate();
+
         // 도메인 db로 가는 출구인 port로 보내고 저장 완료 되면 결과값 받아오기
         Post created = createPostPort.createPost(post);
 
