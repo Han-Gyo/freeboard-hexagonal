@@ -1,14 +1,14 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
+import com.practice.freeboard.adapter.in.web.vo.ListPostsResponseVo;
 import com.practice.freeboard.adapter.in.web.vo.ReadPostResponseVo;
 import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
 import com.practice.freeboard.application.port.in.command.CreatePostCommand;
+import com.practice.freeboard.application.port.in.command.ListPostsQuery;
 import com.practice.freeboard.application.port.in.command.UpdatePostCommand;
-import com.practice.freeboard.application.port.in.usecase.CreatePostUseCase;
-import com.practice.freeboard.application.port.in.usecase.DeletePostUseCase;
-import com.practice.freeboard.application.port.in.usecase.ReadPostUseCase;
-import com.practice.freeboard.application.port.in.usecase.UpdatePostUseCase;
+import com.practice.freeboard.application.port.in.result.ListPostsResult;
+import com.practice.freeboard.application.port.in.usecase.*;
 import com.practice.freeboard.domain.model.Post;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,6 +28,7 @@ public class PostController {
     private final ReadPostUseCase readPostUseCase;
     private final UpdatePostUseCase updatePostUseCase;
     private final DeletePostUseCase deletePostUseCase;
+    private final ListPostsUseCase listPostsUseCase;
 
     @PostMapping
     public ResponseEntity<Map<String, Long>> createPost (@RequestBody @Valid CreatePostRequestVo createPostRequestVo){
@@ -58,6 +60,37 @@ public class PostController {
         return ResponseEntity.ok(readPostResponseVo);
     }
 
+    @GetMapping
+    public ResponseEntity<ListPostsResponseVo> list(@RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size,
+                                                    @RequestParam(defaultValue = "createdAt,DESC") String sort ){
+
+        // 1. Web 파라미터 -> Application Query  (ListPostsQuery클래스)
+        ListPostsQuery query = new ListPostsQuery(page, size, sort);
+
+        // UseCase 실행 후 결과 ListPostsResult에 담기
+        ListPostsResult result = listPostsUseCase.list(query);
+
+        // ListPostsResult 담은걸 -> 응답 Vo로 매핑 Result는 도메인 타입으로 담겨있음
+        List<ReadPostResponseVo> posts = result.getPosts().stream()
+                .map(post -> new ReadPostResponseVo(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getAuthorName()))
+                .toList();
+
+        // List에 담은 게시글들 ListPostsResponseVo에 넣기
+        ListPostsResponseVo body = new ListPostsResponseVo(posts,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getPage(),
+                result.getSize());
+
+        return ResponseEntity.ok(body);
+
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable Long id,
                                                       @RequestBody @Valid UpdatePostRequestVo updatePostRequestVo){
@@ -82,5 +115,6 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "삭제 완료"));
 
     }
+
 
 }
