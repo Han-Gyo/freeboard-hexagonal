@@ -1,5 +1,7 @@
 package com.practice.freeboard.adapter.in.web;
 
+import com.practice.freeboard.application.exception.DuplicateEmailException;
+import com.practice.freeboard.application.exception.LoginFailedException;
 import com.practice.freeboard.application.exception.PostNotFoundException;
 import com.practice.freeboard.domain.exception.InvalidPostException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handlerPostNotFound(PostNotFoundException e){
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    }
+
+    // 이메일 중복 가입 → 409 Conflict (요청은 이해했지만 상태 충돌)
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<Map<String, String>> handlerDuplicateEmail(DuplicateEmailException e) {
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+    }
+
+    // 로그인 실패 → 401 Unauthorized (인증 실패)
+    @ExceptionHandler(LoginFailedException.class)
+    public ResponseEntity<Map<String, String>> handlerLoginFailed(LoginFailedException e) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
 
     // @Valid 형식 검증 실패 → 400 JSON 통일시키기 통일 안 시키면 JSON 모양이 제각각임
