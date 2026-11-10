@@ -13,3 +13,10 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 10  # Lazy 연관 조회를 이 개수만큼 IN으로 묶음
+
+# JWT 서명용 서버 비밀키 (사원증에 찍는 도장). 사람마다 다르지 않고 서버 공통.
+# 로컬 연습용 값. 나중에 환경변수로 빼는 게 안전하다.
+jwt:
+  secret: freeboard-local-jwt-secret-key-change-me-32bytes-min
+  # 액세스 토큰 유효시간 (밀리초) — 1시간
+  access-token-validity-ms: 3600000

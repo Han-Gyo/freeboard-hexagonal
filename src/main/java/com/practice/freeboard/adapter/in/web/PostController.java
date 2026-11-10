@@ -106,6 +106,11 @@ public class PostController {
 
     }
 
+    /**
+     * 게시글 삭제.
+     * 인가: SecurityConfig에서 DELETE /posts/** → ADMIN만 허용.
+     * (컨트롤러에 역할 코드를 안 적어도, 필터체인이 먼저 막는다)
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete (@PathVariable Long id){
 
