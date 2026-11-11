@@ -26,4 +26,10 @@ public class LoginAdapter implements LoginPort {
         return memberJpaRepository.findByEmail(email)
                 .map(MemberMapper::toDomain);
     }
+
+    @Override
+    public Optional<Member> findById(Long id) {
+        return memberJpaRepository.findById(id)
+                .map(MemberMapper::toDomain);
+    }
 }
