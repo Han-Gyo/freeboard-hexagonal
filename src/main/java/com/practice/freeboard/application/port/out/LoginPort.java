@@ -15,4 +15,10 @@ public interface LoginPort {
      * 없으면 Optional.empty() → 로그인 실패 처리.
      */
     Optional<Member> findByEmail(String email);
+
+    /**
+     * id로 회원 찾기.
+     * Refresh 재발급 때 memberId로 role 꺼내 Access 만들 때 씀.
+     */
+    Optional<Member> findById(Long id);
 }

@@ -5,13 +5,16 @@ import lombok.Getter;
 
 /**
  * 로그인 성공 결과.
- * 컨트롤러가 JSON으로 내려줄 액세스 토큰을 담는다.
- * (세션 대신 클라이언트가 들고 다닐 사원증)
+ * Access: API 호출용 (Bearer)
+ * Refresh: Access 만료 후 재발급용 (DB에도 저장됨)
  */
 @Getter
 @AllArgsConstructor
 public class LoginResult {
 
-    /** Authorization: Bearer 에 넣을 JWT 문자열 */
+    /** Authorization: Bearer 에 넣을 JWT */
     private String accessToken;
+
+    /** 클라가 따로 보관. Access 떨어지면 /auth/refresh 때 보냄 */
+    private String refreshToken;
 }

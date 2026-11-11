@@ -62,8 +62,12 @@ public class SecurityConfig {
                 )
                 // URL별 인가 규칙 (위→아래 순서대로 매칭, 먼저 맞는 규칙 적용)
                 .authorizeHttpRequests(auth -> auth
-                        // 가입·로그인은 토큰 없이 호출해야 함
-                        .requestMatchers("/auth/signup", "/auth/login").permitAll()
+                        // 가입·로그인·재발급은 Access 없이 호출해야 함 재발급 때 Access필요 없는 이유는 어차피 리프레쉬 토큰으로 검증해서 재발급 하기 때문임. Access가 있든 말든 관계 X
+                        .requestMatchers(
+                                "/auth/signup",
+                                "/auth/login",
+                                "/auth/refresh"
+                        ).permitAll()
                         // API 문서 화면/스펙도 로그인 없이 보게
                         .requestMatchers(
                                 "/swagger-ui/**",

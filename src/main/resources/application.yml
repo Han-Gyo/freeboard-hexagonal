@@ -18,5 +18,10 @@ spring:
 # 로컬 연습용 값. 나중에 환경변수로 빼는 게 안전하다.
 jwt:
   secret: freeboard-local-jwt-secret-key-change-me-32bytes-min
-  # 액세스 토큰 유효시간 (밀리초) — 1시간
+  # Access: API 호출용. 짧게 잡음. 만료되면 Refresh로 새로 받음
+  # 1시간 = 3600000ms
   access-token-validity-ms: 3600000
+  # Refresh: Access 재발급권. Access보다 길게.
+  # 이 시간 지나면 다시 로그인해야 함. 7일 = 604800000ms
+  # (서버가 타이머로 자동 갱신하는 값이 아님. 클라이언트가 /auth/refresh 호출할 때 씀)
+  refresh-token-validity-ms: 604800000

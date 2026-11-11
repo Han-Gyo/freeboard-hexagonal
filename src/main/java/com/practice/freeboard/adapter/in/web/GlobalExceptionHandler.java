@@ -1,6 +1,7 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.application.exception.DuplicateEmailException;
+import com.practice.freeboard.application.exception.InvalidRefreshTokenException;
 import com.practice.freeboard.application.exception.LoginFailedException;
 import com.practice.freeboard.application.exception.PostNotFoundException;
 import com.practice.freeboard.domain.exception.InvalidPostException;
@@ -33,6 +34,13 @@ public class GlobalExceptionHandler {
     // 로그인 실패 → 401 Unauthorized (인증 실패)
     @ExceptionHandler(LoginFailedException.class)
     public ResponseEntity<Map<String, String>> handlerLoginFailed(LoginFailedException e) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
+    }
+
+    // Refresh 무효 → 401 (다시 로그인)
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<Map<String, String>> handlerInvalidRefresh(InvalidRefreshTokenException e) {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", e.getMessage()));
     }
