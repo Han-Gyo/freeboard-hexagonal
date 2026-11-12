@@ -8,6 +8,7 @@ import com.practice.freeboard.domain.model.RefreshToken;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -40,5 +41,16 @@ public class RefreshTokenAdapter implements RefreshTokenPort {
             entity.revoke();
             refreshTokenJpaRepository.save(entity);
         });
+    }
+
+    @Override
+    public void revokeAllByMemberId(Long memberId) {
+        // 그 사람 토큰 행을 다 꺼내서 하나씩 revoke
+        // (이미 죽은 것도 다시 true 찍어도 문제 없음)
+        List<RefreshTokenEntity> tokens = refreshTokenJpaRepository.findByMemberId(memberId);
+        for (RefreshTokenEntity entity : tokens) {
+            entity.revoke();
+            refreshTokenJpaRepository.save(entity);
+        }
     }
 }

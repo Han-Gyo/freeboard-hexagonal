@@ -66,7 +66,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/signup",
                                 "/auth/login",
-                                "/auth/refresh"
+                                "/auth/refresh",
+                                "/auth/logout"
                         ).permitAll()
                         // API 문서 화면/스펙도 로그인 없이 보게
                         .requestMatchers(

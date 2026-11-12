@@ -19,6 +19,14 @@ public interface RefreshTokenPort {
     /**
      * 토큰 폐기 (revoked = true).
      * 재발급 때 옛 Refresh 죽이고 새로 발급할 때 씀 (회전).
+     * 로그아웃 때 "지금 쓰는 Refresh 하나" 죽일 때도 씀.
      */
     void revoke(String token);
+
+    /**
+     * 이 회원이 가진 Refresh를 전부 폐기.
+     * 탈퇴할 때 / 모든 기기에서 끊고 싶을 때 씀.
+     * 토큰 문자열을 몰라도 memberId만 있으면 된다.
+     */
+    void revokeAllByMemberId(Long memberId);
 }
