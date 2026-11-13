@@ -1,110 +1,125 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreatePostRequestVo;
-import com.practice.freeboard.adapter.in.web.vo.PostResponseVo;
+import com.practice.freeboard.adapter.in.web.vo.ListPostsResponseVo;
+import com.practice.freeboard.adapter.in.web.vo.ReadPostResponseVo;
 import com.practice.freeboard.adapter.in.web.vo.UpdatePostRequestVo;
-import com.practice.freeboard.application.port.in.CreatePostUseCase;
-import com.practice.freeboard.application.port.in.DeletePostUseCase;
-import com.practice.freeboard.application.port.in.GetPostUseCase;
-import com.practice.freeboard.application.port.in.UpdatePostUseCase;
-import com.practice.freeboard.application.port.in.dto.CreatePostCommand;
-import com.practice.freeboard.application.port.in.dto.UpdatePostCommand;
+import com.practice.freeboard.application.port.in.command.CreatePostCommand;
+import com.practice.freeboard.application.port.in.command.ListPostsQuery;
+import com.practice.freeboard.application.port.in.command.UpdatePostCommand;
+import com.practice.freeboard.application.port.in.result.ListPostsResult;
+import com.practice.freeboard.application.port.in.usecase.*;
 import com.practice.freeboard.domain.model.Post;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/posts")
+@AllArgsConstructor
 public class PostController {
 
-    // HTTP -> 유스케이스만 호출 ( DB 모름 )  클라이언트가 사용자가 할 수 있는것만 호출
     private final CreatePostUseCase createPostUseCase;
-
-    private final GetPostUseCase getPostUseCase;
-
+    private final ReadPostUseCase readPostUseCase;
     private final UpdatePostUseCase updatePostUseCase;
-
     private final DeletePostUseCase deletePostUseCase;
-
-    public PostController(CreatePostUseCase createPostUseCase,
-                          GetPostUseCase getPostUseCase,
-                          UpdatePostUseCase updatePostUseCase,
-                          DeletePostUseCase deletePostUseCase) {
-
-        this.createPostUseCase = createPostUseCase;
-        this.getPostUseCase = getPostUseCase;
-        this.updatePostUseCase = updatePostUseCase;
-        this.deletePostUseCase = deletePostUseCase;
-
-    }
+    private final ListPostsUseCase listPostsUseCase;
 
     @PostMapping
-    public ResponseEntity<Map<String, Long>> create(@RequestBody
-                                                    CreatePostRequestVo request) {
-        // 1) 클라 요청 -> 어플리케이션 커맨드 ( CreatePostCommand )
-        CreatePostCommand command = new CreatePostCommand(
-                request.getTitle(),
-                request.getContent(),
-                request.getAuthorName()
+    public ResponseEntity<Map<String, Long>> createPost (@RequestBody @Valid CreatePostRequestVo createPostRequestVo){
+
+        // vo -> dto
+        CreatePostCommand createPostCommand = new CreatePostCommand(
+                createPostRequestVo.getTitle(),
+                createPostRequestVo.getContent(),
+                createPostRequestVo.getAuthorName()
         );
 
-        // 2) 생성 유스케이스 실행 -> 저장된 id
-        Long id = createPostUseCase.create(command);
+        // useCase 접근하기
+        Long id = createPostUseCase.createPost(createPostCommand);
 
-        // 3) 201 created + { "id" : ... } 응답
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(Map.of("id", id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", id));
 
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseVo> getPost(@PathVariable Long id) {
-        // URL의 {id} -> Long id
+    public ResponseEntity<ReadPostResponseVo> read (@PathVariable Long id){
 
-        Post post = getPostUseCase.getById(id);
+        Post post = readPostUseCase.read(id);
 
-        // 도메인 -> 응답 VO
-        PostResponseVo body = new PostResponseVo(
-                post.getId(),
+        ReadPostResponseVo readPostResponseVo = new ReadPostResponseVo(post.getId(),
                 post.getTitle(),
                 post.getContent(),
-                post.getAuthorName()
-        );
+                post.getAuthorName());
 
-        return ResponseEntity.ok(body); // 200
+        return ResponseEntity.ok(readPostResponseVo);
+    }
+
+    @GetMapping
+    public ResponseEntity<ListPostsResponseVo> list(@RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size,
+                                                    @RequestParam(defaultValue = "createdAt,DESC") String sort ){
+
+        // 1. Web 파라미터 -> Application Query  (ListPostsQuery클래스)
+        ListPostsQuery query = new ListPostsQuery(page, size, sort);
+
+        // UseCase 실행 후 결과 ListPostsResult에 담기
+        ListPostsResult result = listPostsUseCase.list(query);
+
+        // ListPostsResult 담은걸 -> 응답 Vo로 매핑 Result는 도메인 타입으로 담겨있음
+        List<ReadPostResponseVo> posts = result.getPosts().stream()
+                .map(post -> new ReadPostResponseVo(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getContent(),
+                        post.getAuthorName()))
+                .toList();
+
+        // List에 담은 게시글들 ListPostsResponseVo에 넣기
+        ListPostsResponseVo body = new ListPostsResponseVo(posts,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getPage(),
+                result.getSize());
+
+        return ResponseEntity.ok(body);
 
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> update(
-            @PathVariable Long id,
-            @RequestBody UpdatePostRequestVo request
-            ) {
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id,
+                                                      @RequestBody @Valid UpdatePostRequestVo updatePostRequestVo){
 
-        UpdatePostCommand updatePostCommand = new UpdatePostCommand(
-                id,
-                request.getTitle(),
-                request.getContent(),
-                request.getAuthorName()
-        );
+        // 1. Vo -> DTO
+        UpdatePostCommand updateDto = new UpdatePostCommand(id, updatePostRequestVo.getTitle(),
+                updatePostRequestVo.getContent());
 
-        updatePostUseCase.update(updatePostCommand);
+        // 2. UseCase 가기
+        updatePostUseCase.update(updateDto);
 
-        return ResponseEntity.ok(Map.of("message", "수정 완료"));
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "수정 완료"));
 
     }
 
+    /**
+     * 게시글 삭제.
+     * 인가: SecurityConfig에서 DELETE /posts/** → ADMIN만 허용.
+     * (컨트롤러에 역할 코드를 안 적어도, 필터체인이 먼저 막는다)
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id){
+    public ResponseEntity<Map<String, String>> delete (@PathVariable Long id){
 
+        // 담을 그릇 즉 DTO 만들 필요없이 바로 useCase가면 됨
         deletePostUseCase.delete(id);
 
-        return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "삭제 완료"));
 
     }
+
 
 }

@@ -1,45 +1,45 @@
 package com.practice.freeboard.application.service;
 
 import com.practice.freeboard.application.exception.PostNotFoundException;
-import com.practice.freeboard.application.port.in.UpdatePostUseCase;
-import com.practice.freeboard.application.port.in.dto.UpdatePostCommand;
-import com.practice.freeboard.application.port.out.PostLoadPort;
-import com.practice.freeboard.application.port.out.PostSavePort;
+import com.practice.freeboard.application.port.in.command.UpdatePostCommand;
+import com.practice.freeboard.application.port.in.usecase.UpdatePostUseCase;
+import com.practice.freeboard.application.port.out.ReadPostPort;
+import com.practice.freeboard.application.port.out.UpdatePostPort;
 import com.practice.freeboard.domain.model.Post;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@AllArgsConstructor
 public class UpdatePostService implements UpdatePostUseCase {
 
-    private final PostLoadPort postLoadPort;
-    private final PostSavePort postSavePort;
+    // 조회 Port 재사용
+    private final ReadPostPort readPostPort ;
+    // 업데이트 Port
+    private final UpdatePostPort updatePostPort;
 
-    public UpdatePostService(PostLoadPort postLoadPort, PostSavePort portSavePort) {
-        this.postLoadPort = postLoadPort;
-        this.postSavePort = portSavePort;
-    }
 
     @Override
-    @Transactional
-    public void update(UpdatePostCommand command) {
+    @Transactional // 모든 동작이 전부 성공돼야함 하나라도 실패시 롤백 처리 하기 위해서 트랜잭셔널 사용
+    public void update(UpdatePostCommand updatePostCommand) {
 
-        // 기존 글 조회
-        Post existing = postLoadPort.findById(command.getId())
-                .orElseThrow(() -> new PostNotFoundException(command.getId()));
+        // 사용자가 update 요청한 게시글이 있는지 조회하기 ( readPostPort 재사용 )
+        Post exist = readPostPort.read(updatePostCommand.getId())
+                .orElseThrow(() -> new PostNotFoundException(updatePostCommand.getId()));
 
-        // 수정된 Domain ( setter 사용 안 하니 새로 생성, id, type, createdAt은 유지 )
-        Post updated = new Post (
-                existing.getId(),
-                command.getTitle(),
-                command.getContent(),
-                command.getAuthorName(),
-                existing.getPostType(),
-                existing.getCreatedAt()
-        );
+        // 가져온 id 값 + 클라이언트가 요청한 데이터들 domain으로 변경
+        Post updatePost = new Post (exist.getId(),
+                updatePostCommand.getTitle(),
+                updatePostCommand.getContent(),
+                exist.getAuthorName(),
+                exist.getCreatedAt());
 
-        // 저장
-        postSavePort.save(updated);
+        // 도메인 규칙 검사
+        updatePost.validate();
+
+        // domain에 담은 내용들 업데이트하는 출구로 보내기
+        updatePostPort.update(updatePost);
 
     }
 }
