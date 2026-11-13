@@ -3,7 +3,10 @@ package com.practice.freeboard.adapter.in.web;
 import com.practice.freeboard.application.exception.DuplicateEmailException;
 import com.practice.freeboard.application.exception.InvalidRefreshTokenException;
 import com.practice.freeboard.application.exception.LoginFailedException;
+import com.practice.freeboard.application.exception.MatchConflictException;
+import com.practice.freeboard.application.exception.MatchNotFoundException;
 import com.practice.freeboard.application.exception.PostNotFoundException;
+import com.practice.freeboard.domain.exception.InvalidMatchException;
 import com.practice.freeboard.domain.exception.InvalidPostException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,6 +63,24 @@ public class GlobalExceptionHandler {
         // 규칙 위반은 잘못된 요청이라 HttpStatus.BAD_REQUEST임
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
 
+    }
+
+    // 매칭 없음 → 404
+    @ExceptionHandler(MatchNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handlerMatchNotFound(MatchNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    }
+
+    // 선착순 경합·이미 처리된 상태 → 409
+    @ExceptionHandler(MatchConflictException.class)
+    public ResponseEntity<Map<String, String>> handlerMatchConflict(MatchConflictException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
+    }
+
+    // 매칭 도메인 규칙 위반 (잘못된 전이·본인 아님 등) → 400
+    @ExceptionHandler(InvalidMatchException.class)
+    public ResponseEntity<Map<String, String>> handlerInvalidMatch(InvalidMatchException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
     }
 
 }

@@ -77,7 +77,13 @@ public class SecurityConfig {
                         ).permitAll()
                         // 게시글 삭제만 관리자 역할 필요 (7단계 역할 인가)
                         .requestMatchers(HttpMethod.DELETE, "/posts/**").hasRole("ADMIN")
-                        // 그 외 /posts 조회·작성·수정 등 → 인증(유효 JWT) 필요
+                        // 매칭 수락·거절은 수의사만 (완료는 보호자·수의사 둘 다 → authenticated)
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/matches/*/accept",
+                                "/matches/*/reject"
+                        ).hasRole("VET")
+                        // 그 외 /posts·/matches(완료·요청·취소 포함) → 인증(유효 JWT) 필요
                         .anyRequest().authenticated()
                 )
                 // 기본은 미인증도 403을 주는 경우가 있어, API에 맞게 상태코드 구분
