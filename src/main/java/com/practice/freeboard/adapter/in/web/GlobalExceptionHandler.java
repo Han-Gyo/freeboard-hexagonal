@@ -6,6 +6,7 @@ import com.practice.freeboard.application.exception.LoginFailedException;
 import com.practice.freeboard.application.exception.MatchConflictException;
 import com.practice.freeboard.application.exception.MatchNotFoundException;
 import com.practice.freeboard.application.exception.MemberNotFoundException;
+import com.practice.freeboard.application.exception.NoAvailableVetException;
 import com.practice.freeboard.application.exception.PostNotFoundException;
 import com.practice.freeboard.domain.exception.InvalidMatchException;
 import com.practice.freeboard.domain.exception.InvalidMemberException;
@@ -95,6 +96,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidMemberException.class)
     public ResponseEntity<Map<String, String>> handlerInvalidMember(InvalidMemberException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+    }
+
+    // ON 수의사 0명 → 매칭 요청 입구에서 거절 (409)
+    @ExceptionHandler(NoAvailableVetException.class)
+    public ResponseEntity<Map<String, String>> handlerNoAvailableVet(NoAvailableVetException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", e.getMessage()));
     }
 
 }
