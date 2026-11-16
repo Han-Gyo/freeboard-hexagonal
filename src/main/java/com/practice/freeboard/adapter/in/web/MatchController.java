@@ -1,6 +1,7 @@
 package com.practice.freeboard.adapter.in.web;
 
 import com.practice.freeboard.adapter.in.web.vo.CreateMatchRequestVo;
+import com.practice.freeboard.adapter.in.web.vo.ReadMatchResponseVo;
 import com.practice.freeboard.application.port.in.command.AcceptMatchCommand;
 import com.practice.freeboard.application.port.in.command.CancelMatchCommand;
 import com.practice.freeboard.application.port.in.command.CompleteMatchCommand;
@@ -10,13 +11,16 @@ import com.practice.freeboard.application.port.in.usecase.AcceptMatchUseCase;
 import com.practice.freeboard.application.port.in.usecase.CancelMatchUseCase;
 import com.practice.freeboard.application.port.in.usecase.CompleteMatchUseCase;
 import com.practice.freeboard.application.port.in.usecase.CreateMatchUseCase;
+import com.practice.freeboard.application.port.in.usecase.ReadMatchUseCase;
 import com.practice.freeboard.application.port.in.usecase.RejectMatchUseCase;
+import com.practice.freeboard.domain.model.MatchRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +39,7 @@ import java.util.Map;
 public class MatchController {
 
     private final CreateMatchUseCase createMatchUseCase;
+    private final ReadMatchUseCase readMatchUseCase;
     private final AcceptMatchUseCase acceptMatchUseCase;
     private final RejectMatchUseCase rejectMatchUseCase;
     private final CancelMatchUseCase cancelMatchUseCase;
@@ -69,6 +74,35 @@ public class MatchController {
 
         Long matchId = createMatchUseCase.createMatch(command);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", matchId));
+    }
+
+    /**
+     * GET /matches/{id}
+     * 매칭 단건 조회 (상태·펫 정보).
+     * 로그인만 되면 됨. (본인만 보기 권한은 나중에 조여도 됨)
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ReadMatchResponseVo> read(@PathVariable Long id) {
+
+        MatchRequest match = readMatchUseCase.read(id);
+
+        // 도메인 → 응답 Vo
+        ReadMatchResponseVo body = new ReadMatchResponseVo(
+                match.getId(),
+                match.getOwnerId(),
+                match.getAcceptedVetId(),
+                match.getStatus(),
+                match.getSymptom(),
+                match.getConsultType(),
+                match.getPetName(),
+                match.getPetBreed(),
+                match.getPetAge(),
+                match.getPetWeight(),
+                match.getPetGender(),
+                match.getCreatedAt()
+        );
+
+        return ResponseEntity.ok(body);
     }
 
     /**

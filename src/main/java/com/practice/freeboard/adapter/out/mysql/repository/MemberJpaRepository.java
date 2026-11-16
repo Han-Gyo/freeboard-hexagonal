@@ -1,6 +1,7 @@
 package com.practice.freeboard.adapter.out.mysql.repository;
 
 import com.practice.freeboard.adapter.out.mysql.entity.MemberEntity;
+import com.practice.freeboard.domain.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,13 @@ public interface MemberJpaRepository extends JpaRepository<MemberEntity, Long> {
      * true면 이미 가입된 이메일.
      */
     boolean existsByEmail(String email);
+
+    /**
+     * 매칭 요청 입구용.
+     * role=VET 이고 matchingAvailable=true 인 회원이 한 명이라도 있으면 true.
+     * Spring Data 메서드 이름 → COUNT/EXISTS 쿼리 자동 생성.
+     */
+    boolean existsByRoleAndMatchingAvailable(Role role, boolean matchingAvailable);
 
     /**
      * 상담 가능 ON/OFF만 갱신.
