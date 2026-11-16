@@ -42,11 +42,13 @@ public class SignUpService implements SignUpUseCase {
         String encodedPassword = passwordEncoder.encode(command.getPassword());
 
         // 3) 도메인 회원 만들기. 자가가입은 기본 USER (ADMIN 자기등록 막기)
+        // matchingAvailable=false: 가입 직후엔 매칭 OFF (나중에 수의사가 라디오로 ON)
         Member member = new Member(
                 null,
                 command.getEmail(),
                 encodedPassword,
                 Role.USER,
+                false,
                 LocalDateTime.now()
         );
 

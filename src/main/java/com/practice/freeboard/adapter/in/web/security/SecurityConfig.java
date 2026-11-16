@@ -83,6 +83,11 @@ public class SecurityConfig {
                                 "/matches/*/accept",
                                 "/matches/*/reject"
                         ).hasRole("VET")
+                        // 상담 가능 ON/OFF 라디오 → 수의사만
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/members/me/matching-available"
+                        ).hasRole("VET")
                         // 그 외 /posts·/matches(완료·요청·취소 포함) → 인증(유효 JWT) 필요
                         .anyRequest().authenticated()
                 )
