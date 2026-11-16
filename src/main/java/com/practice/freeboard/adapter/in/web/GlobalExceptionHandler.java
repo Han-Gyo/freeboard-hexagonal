@@ -5,8 +5,10 @@ import com.practice.freeboard.application.exception.InvalidRefreshTokenException
 import com.practice.freeboard.application.exception.LoginFailedException;
 import com.practice.freeboard.application.exception.MatchConflictException;
 import com.practice.freeboard.application.exception.MatchNotFoundException;
+import com.practice.freeboard.application.exception.MemberNotFoundException;
 import com.practice.freeboard.application.exception.PostNotFoundException;
 import com.practice.freeboard.domain.exception.InvalidMatchException;
+import com.practice.freeboard.domain.exception.InvalidMemberException;
 import com.practice.freeboard.domain.exception.InvalidPostException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +82,18 @@ public class GlobalExceptionHandler {
     // 매칭 도메인 규칙 위반 (잘못된 전이·본인 아님 등) → 400
     @ExceptionHandler(InvalidMatchException.class)
     public ResponseEntity<Map<String, String>> handlerInvalidMatch(InvalidMatchException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+    }
+
+    // 회원 없음 → 404
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handlerMemberNotFound(MemberNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
+    }
+
+    // 회원 도메인 규칙 (수의사만 ON/OFF 등) → 400
+    @ExceptionHandler(InvalidMemberException.class)
+    public ResponseEntity<Map<String, String>> handlerInvalidMember(InvalidMemberException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
     }
 

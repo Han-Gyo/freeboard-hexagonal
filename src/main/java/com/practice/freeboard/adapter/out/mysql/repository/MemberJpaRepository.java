@@ -2,6 +2,9 @@ package com.practice.freeboard.adapter.out.mysql.repository;
 
 import com.practice.freeboard.adapter.out.mysql.entity.MemberEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
@@ -24,5 +27,21 @@ public interface MemberJpaRepository extends JpaRepository<MemberEntity, Long> {
      * true면 이미 가입된 이메일.
      */
     boolean existsByEmail(String email);
+
+    /**
+     * 상담 가능 ON/OFF만 갱신.
+     * @return 영향 행 수 (1=성공, 0=없는 id)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            update MemberEntity m
+               set m.matchingAvailable = :available
+             where m.id = :id
+            """)
+    int updateMatchingAvailable(
+            @Param("id") Long id,
+            @Param("available") boolean available
+    );
 }
+
 

@@ -16,20 +16,21 @@ public final class MemberMapper {
 
     /**
      * 도메인 회원 -> DB 저장용 Entity.
-     * 회원가입 때 씀. id는 Entity 생성자에 없으니 INSERT 후 DB가 채운다.
+     * 가입·ON/OFF 저장 때 씀. matchingAvailable 도 같이 넣음.
      */
     public static MemberEntity toEntity(Member member) {
         return new MemberEntity(
                 member.getEmail(),
                 member.getPassword(),
                 member.getRole(),
+                member.isMatchingAvailable(),
                 member.getCreatedAt()
         );
     }
 
     /**
      * DB 행 -> 도메인 회원.
-     * 로그인 성공 후 JWT에 넣을 id/role 을 도메인으로 넘길 때 사용.
+     * 로그인·토글 전 조회 등. matchingAvailable 은 DB 값 그대로.
      */
     public static Member toDomain(MemberEntity entity) {
         return new Member(
@@ -37,6 +38,7 @@ public final class MemberMapper {
                 entity.getEmail(),
                 entity.getPassword(),
                 entity.getRole(),
+                entity.isMatchingAvailable(),
                 entity.getCreatedAt()
         );
     }

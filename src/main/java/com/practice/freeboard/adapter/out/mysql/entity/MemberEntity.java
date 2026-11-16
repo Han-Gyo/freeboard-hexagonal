@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
  * 왜 필요하냐면: 로그인할 때 DB에서 이메일로 회원을 찾고,
  * 저장된 해시 비번과 입력 비번을 비교해야 하기 때문.
  * (JWT는 그 검증이 끝난 뒤에 발급한다)
+ *
+ * matching_available: 수의사 라디오 ON/OFF 저장 칸.
+ * ddl-auto=update 면 기동 시 컬럼 추가됨.
  */
 @Entity
 @Table(name = "member")
@@ -45,17 +48,32 @@ public class MemberEntity {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    /**
+     * 실시간 상담(매칭) 가능 여부.
+     * DB 컬럼명 matching_available.
+     * 가입 기본 false. 수의사가 라디오로 바꿀 때 UPDATE.
+     */
+    @Column(name = "matching_available", nullable = false)
+    private boolean matchingAvailable;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
     /**
-     * 회원가입 저장용 생성자.
+     * 회원가입·저장용 생성자.
      * id는 null로 두고 INSERT 때 DB가 채운다.
      */
-    public MemberEntity(String email, String password, Role role, LocalDateTime createdAt) {
+    public MemberEntity(
+            String email,
+            String password,
+            Role role,
+            boolean matchingAvailable,
+            LocalDateTime createdAt
+    ) {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.matchingAvailable = matchingAvailable;
         this.createdAt = createdAt;
     }
 }
